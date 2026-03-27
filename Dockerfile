@@ -1,12 +1,17 @@
-FROM python:3.10-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt || true
+RUN pip install poetry
+
+COPY pyproject.toml poetry.lock* /app/
+
+RUN poetry config virtualenvs.create false
+
+RUN poetry install --no-interaction --no-ansi
 
 COPY . /app
 
 EXPOSE 8003
 
-CMD ["python", "main.py"]
+CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]
