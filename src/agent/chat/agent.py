@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # ==================== Context Schema ====================
 class AgentContext(TypedDict):
     """Context passed to the agent on each invocation (not persisted in state)."""
+
     language: str
 
 
@@ -47,10 +48,14 @@ Text: {text}"""
 async def _detect_language(text: str) -> str:
     """Detect the language of the given text using a lightweight LLM call."""
     try:
-        response = await _lang_detect_model.ainvoke([
-            SystemMessage(content="You are a language detector. Respond with only the language name."),
-            HumanMessage(content=LANG_DETECT_PROMPT.format(text=text)),
-        ])
+        response = await _lang_detect_model.ainvoke(
+            [
+                SystemMessage(
+                    content="You are a language detector. Respond with only the language name."
+                ),
+                HumanMessage(content=LANG_DETECT_PROMPT.format(text=text)),
+            ]
+        )
 
         print(f"Language detection response: {response.content}")
         detected = response.content.strip()
@@ -59,7 +64,6 @@ async def _detect_language(text: str) -> str:
     except Exception as e:
         logger.warning(f"Language detection failed: {e}, defaulting to English")
         return "English"
-
 
 
 # ==================== Agent Invocation ====================
@@ -114,5 +118,4 @@ async def chat_with_assistant(
 
     # 6. Post AI response back to backend API
     await post_ai_message(group_id, assistant_text)
-
     return assistant_text

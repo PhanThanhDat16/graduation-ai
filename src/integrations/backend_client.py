@@ -19,7 +19,7 @@ TIMEOUT = httpx.Timeout(10.0, read=30.0)
 
 async def fetch_all_jobs() -> Optional[list[dict]]:
     """Fetch all open jobs from the backend API.
-    
+
     Returns:
         List of job dicts in AI format, or None if backend unavailable.
     """
@@ -36,10 +36,10 @@ async def fetch_all_jobs() -> Optional[list[dict]]:
 
 async def fetch_job_by_id(job_id: str) -> Optional[dict]:
     """Fetch a single job by ID from the backend API.
-    
+
     Args:
         job_id: The project/job ID (MongoDB ObjectId string).
-        
+
     Returns:
         Job dict in AI format, or None if not found/unavailable.
     """
@@ -57,7 +57,7 @@ async def fetch_job_by_id(job_id: str) -> Optional[dict]:
 
 async def fetch_all_freelancers() -> Optional[list[dict]]:
     """Fetch all active freelancers from the backend API.
-    
+
     Returns:
         List of freelancer dicts in AI format, or None if backend unavailable.
     """
@@ -74,10 +74,10 @@ async def fetch_all_freelancers() -> Optional[list[dict]]:
 
 async def fetch_freelancer_by_id(freelancer_id: str) -> Optional[dict]:
     """Fetch a single freelancer by ID from the backend API.
-    
+
     Args:
         freelancer_id: The user ID (MongoDB ObjectId string).
-        
+
     Returns:
         Freelancer dict in AI format, or None if not found/unavailable.
     """
@@ -95,19 +95,18 @@ async def fetch_freelancer_by_id(freelancer_id: str) -> Optional[dict]:
 
 async def fetch_messages(group_id: str, limit: int = 10) -> Optional[list[dict]]:
     """Fetch the last N messages of a group for conversation context.
-    
+
     Args:
         group_id: The chat group ObjectId string.
         limit: Number of recent messages to fetch (default 10).
-        
+
     Returns:
         List of message dicts with role/content, or None if unavailable.
     """
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             response = await client.get(
-                f"{BASE_URL}/groups/{group_id}/messages",
-                params={"limit": limit}
+                f"{BASE_URL}/groups/{group_id}/messages", params={"limit": limit}
             )
             if response.status_code == 404:
                 return None
@@ -121,24 +120,21 @@ async def fetch_messages(group_id: str, limit: int = 10) -> Optional[list[dict]]
 
 async def post_ai_message(group_id: str, content: str) -> Optional[dict]:
     """Save an AI-generated message into a group via the backend API.
-    
+
     Args:
         group_id: The chat group ObjectId string.
         content: The AI response text.
-        
+
     Returns:
         Created message dict, or None if failed.
     """
+    url = f"{BASE_URL}/groups/{group_id}/messages"
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            response = await client.post(
-                f"{BASE_URL}/groups/{group_id}/messages",
-                json={"content": content}
-            )
+            response = await client.post(url, json={"content": content})
             response.raise_for_status()
             data = response.json()
             return data.get("data")
     except Exception as e:
         logger.warning(f"Failed to post AI message to group {group_id}: {e}")
         return None
-
