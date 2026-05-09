@@ -1,7 +1,7 @@
 """Application configuration."""
 
 from typing import Optional
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -32,15 +32,19 @@ class Settings(BaseSettings):
     LANGFUSE_HOST: str = "https://cloud.langfuse.com"
 
 
-    # MongoDB Configuration
-    MONGODB_URI: str = "mongodb://localhost:27017"
-    MONGODB_DB_NAME: str = "ai"
+    # Backend API Configuration (Node.js API server)
+    BACKEND_API_URL: str = "http://localhost:5000"
+
+    # MongoDB Configuration (overridden by .env)
+    MONGODB_URI: str
+    MONGODB_DB_NAME: str = "project_graduation"
 
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
-        extra = "ignore"  # Allow extra environment variables
+    # class Config:
+    #     env_file = ".env"
+    #     case_sensitive = True
+    #     extra = "ignore"  # Allow extra environment variables
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
 
 settings = Settings()
