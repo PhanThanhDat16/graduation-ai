@@ -78,7 +78,7 @@ async def chat_with_assistant(
     # 4. Invoke agent with language in context
     result = await chat_agent.ainvoke(
         {"messages": all_messages},
-        config={"configurable": {"thread_id": group_id}},
+        config={"configurable": {"thread_id": group_id}, "recursion_limit": 10},
         context={"language": detected_lang},
     )
 

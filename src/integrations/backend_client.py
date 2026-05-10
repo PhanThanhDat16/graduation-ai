@@ -93,6 +93,44 @@ async def fetch_freelancer_by_id(freelancer_id: str) -> Optional[dict]:
         return "fetch freelancer error. Please try again"
 
 
+async def fetch_all_contractors() -> Optional[list[dict]]:
+    """Fetch all active contractors from the backend API.
+
+    Returns:
+        List of contractor dicts in AI format, or None if backend unavailable.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            response = await client.get(f"{BASE_URL}/contractors")
+            response.raise_for_status()
+            data = response.json()
+            return data.get("contractors", [])
+    except Exception as e:
+        logger.warning(f"Failed to fetch contractors from backend: {e}")
+        return "fetch contractors error. Please try again"
+
+
+async def fetch_contractor_by_id(contractor_id: str) -> Optional[dict]:
+    """Fetch a single contractor by ID from the backend API.
+
+    Args:
+        contractor_id: The user ID (MongoDB ObjectId string).
+
+    Returns:
+        Contractor dict in AI format, or None if not found/unavailable.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            response = await client.get(f"{BASE_URL}/contractors/{contractor_id}")
+            if response.status_code == 404:
+                return "fetch contractor error. Please try again"
+            response.raise_for_status()
+            return response.json()
+    except Exception as e:
+        logger.warning(f"Failed to fetch contractor {contractor_id} from backend: {e}")
+        return "fetch contractor error. Please try again"
+
+
 async def fetch_messages(group_id: str, limit: int = 10) -> Optional[list[dict]]:
     """Fetch the last N messages of a group for conversation context.
 
