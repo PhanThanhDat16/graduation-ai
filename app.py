@@ -16,6 +16,5 @@ async def start():
 async def main(message: cl.Message):
 
     response = llm.invoke(message.content)
-    print(response)
 
     await cl.Message(content=response.content).send()

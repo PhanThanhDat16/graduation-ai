@@ -2,13 +2,13 @@ import logging
 from typing import TypedDict
 
 from langchain.agents import create_agent, AgentState
-from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.checkpoint.memory import InMemorySaver
 
 from src.agent.chat.tools import ALL_TOOLS
 from src.integrations.open_ai import langchain_ChatOpenAI
 from src.agent.chat.prompt import build_system_prompt
 from src.integrations.backend_client import fetch_messages, post_ai_message
+from src.agent.detect_language import detect_language
 
 logger = logging.getLogger(__name__)
 
@@ -33,37 +33,6 @@ chat_agent = create_agent(
     context_schema=AgentContext,
     checkpointer=checkpointer,
 )
-
-
-# ==================== Language Detection ====================
-_lang_detect_model = langchain_ChatOpenAI(temperature=0, max_tokens=20)
-
-LANG_DETECT_PROMPT = """Detect the language of the following text.
-Respond with ONLY the language name in English (e.g. "Vietnamese", "English", "Japanese").
-Do not add any explanation.
-
-Text: {text}"""
-
-
-async def _detect_language(text: str) -> str:
-    """Detect the language of the given text using a lightweight LLM call."""
-    try:
-        response = await _lang_detect_model.ainvoke(
-            [
-                SystemMessage(
-                    content="You are a language detector. Respond with only the language name."
-                ),
-                HumanMessage(content=LANG_DETECT_PROMPT.format(text=text)),
-            ]
-        )
-
-        print(f"Language detection response: {response.content}")
-        detected = response.content.strip()
-        logger.info(f"Detected language: {detected}")
-        return detected or "English"
-    except Exception as e:
-        logger.warning(f"Language detection failed: {e}, defaulting to English")
-        return "English"
 
 
 # ==================== Agent Invocation ====================
@@ -104,7 +73,7 @@ async def chat_with_assistant(
     all_messages = history_messages + [{"role": "user", "content": message}]
 
     # 3. Detect language from the user's latest message
-    detected_lang = await _detect_language(message)
+    detected_lang = await detect_language(message)
 
     # 4. Invoke agent with language in context
     result = await chat_agent.ainvoke(
