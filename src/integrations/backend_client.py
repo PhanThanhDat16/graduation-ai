@@ -31,7 +31,7 @@ async def fetch_all_jobs() -> Optional[list[dict]]:
             return data.get("jobs", [])
     except Exception as e:
         logger.warning(f"Failed to fetch jobs from backend: {e}")
-        return "fetch jobs error. Please try again"
+        return []
 
 
 async def fetch_job_by_id(job_id: str) -> Optional[dict]:
@@ -47,13 +47,12 @@ async def fetch_job_by_id(job_id: str) -> Optional[dict]:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             response = await client.get(f"{BASE_URL}/jobs/{job_id}")
             if response.status_code == 404:
-                return "fetch job error. Please try again"
+                return None
             response.raise_for_status()
             return response.json()
     except Exception as e:
         logger.warning(f"Failed to fetch job {job_id} from backend: {e}")
-        return "fetch job error. Please try again"
-
+        return None
 
 async def fetch_all_freelancers() -> Optional[list[dict]]:
     """Fetch all active freelancers from the backend API.
@@ -69,7 +68,7 @@ async def fetch_all_freelancers() -> Optional[list[dict]]:
             return data.get("freelancers", [])
     except Exception as e:
         logger.warning(f"Failed to fetch freelancers from backend: {e}")
-        return "fetch freelancers error. Please try again"
+        return []
 
 
 async def fetch_freelancer_by_id(freelancer_id: str) -> Optional[dict]:
@@ -85,13 +84,12 @@ async def fetch_freelancer_by_id(freelancer_id: str) -> Optional[dict]:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             response = await client.get(f"{BASE_URL}/freelancers/{freelancer_id}")
             if response.status_code == 404:
-                return "fetch freelancer error. Please try again"
+                return None
             response.raise_for_status()
             return response.json()
     except Exception as e:
         logger.warning(f"Failed to fetch freelancer {freelancer_id} from backend: {e}")
-        return "fetch freelancer error. Please try again"
-
+        return None
 
 async def fetch_all_contractors() -> Optional[list[dict]]:
     """Fetch all active contractors from the backend API.
@@ -107,7 +105,7 @@ async def fetch_all_contractors() -> Optional[list[dict]]:
             return data.get("contractors", [])
     except Exception as e:
         logger.warning(f"Failed to fetch contractors from backend: {e}")
-        return "fetch contractors error. Please try again"
+        return []
 
 
 async def fetch_contractor_by_id(contractor_id: str) -> Optional[dict]:
@@ -123,13 +121,12 @@ async def fetch_contractor_by_id(contractor_id: str) -> Optional[dict]:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             response = await client.get(f"{BASE_URL}/contractors/{contractor_id}")
             if response.status_code == 404:
-                return "fetch contractor error. Please try again"
+                return None
             response.raise_for_status()
             return response.json()
     except Exception as e:
         logger.warning(f"Failed to fetch contractor {contractor_id} from backend: {e}")
-        return "fetch contractor error. Please try again"
-
+        return None
 
 async def fetch_messages(group_id: str, limit: int = 10) -> Optional[list[dict]]:
     """Fetch the last N messages of a group for conversation context.

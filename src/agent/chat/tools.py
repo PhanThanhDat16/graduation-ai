@@ -28,11 +28,13 @@ BASE_URL = "http://localhost:3000"
 
 def _format_job_list(jobs: list[dict]) -> str:
     """Format jobs list data into a human-readable string with summary and links."""
-    total = len(jobs)
+    # Filter out non-dict items for robustness
+    valid_jobs = [job for job in jobs if isinstance(job, dict)]
+    total = len(valid_jobs)
 
     lines = [f"Summary: Total {total} jobs available on the platform.\n"]
 
-    for i, job in enumerate(jobs, 1):
+    for i, job in enumerate(valid_jobs, 1):
         job_id = job.get("id", "")
         title = job.get("title", "N/A")
         category = job.get("category", "N/A")
@@ -57,11 +59,13 @@ def _format_job_list(jobs: list[dict]) -> str:
 
 def _format_freelancer_list(freelancers: list[dict]) -> str:
     """Format freelancers list data into a human-readable string with summary and links."""
-    total = len(freelancers)
+    # Filter out non-dict items for robustness
+    valid_freelancers = [fl for fl in freelancers if isinstance(fl, dict)]
+    total = len(valid_freelancers)
 
     lines = [f"Summary: Total {total} freelancers available on the platform.\n"]
 
-    for i, fl in enumerate(freelancers, 1):
+    for i, fl in enumerate(valid_freelancers, 1):
         fl_id = fl.get("id", "")
         full_name = fl.get("fullName", "N/A")
         role = fl.get("role", "N/A")
@@ -84,11 +88,13 @@ def _format_freelancer_list(freelancers: list[dict]) -> str:
 
 def _format_contractor_list(contractors: list[dict]) -> str:
     """Format contractors list data into a human-readable string with summary and links."""
-    total = len(contractors)
+    # Filter out non-dict items for robustness
+    valid_contractors = [ct for ct in contractors if isinstance(ct, dict)]
+    total = len(valid_contractors)
 
     lines = [f"Summary: Total {total} contractors available on the platform.\n"]
 
-    for i, ct in enumerate(contractors, 1):
+    for i, ct in enumerate(valid_contractors, 1):
         ct_id = ct.get("id", "")
         full_name = ct.get("fullName", "N/A")
         role = ct.get("role", "N/A")
@@ -125,6 +131,7 @@ async def get_all_jobs() -> str:
     if not jobs:
         return "No jobs available at the moment or backend is unavailable."
 
+
     return _format_job_list(jobs)
 
 
@@ -145,6 +152,7 @@ async def get_job_details(job_id: str) -> str:
     if isinstance(job, dict):
         job["link"] = f"{BASE_URL}/projects/{job.get('id', job_id)}"
 
+
     return json.dumps(job, indent=2, default=str)
 
 
@@ -163,6 +171,7 @@ async def get_all_freelancers() -> str:
     freelancers = await fetch_all_freelancers()
     if not freelancers:
         return "No freelancers available at the moment or backend is unavailable."
+
 
     return _format_freelancer_list(freelancers)
 
@@ -183,6 +192,7 @@ async def get_freelancer_details(freelancer_id: str) -> str:
     # Add link to the freelancer detail object
     if isinstance(freelancer, dict):
         freelancer["link"] = f"{BASE_URL}/freelancers/{freelancer.get('id', freelancer_id)}"
+
 
     return json.dumps(freelancer, indent=2, default=str)
 
